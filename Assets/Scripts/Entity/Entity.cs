@@ -17,6 +17,11 @@ public class Entity : MonoBehaviour
     {
     }
 
+    public bool IsPaused()
+    {
+        return pause;
+    }
+
     public void SetPause(bool flag)
     {
         pause = flag;

@@ -6,10 +6,6 @@ public class PlayerBuffManager : MonoBehaviour
 {
     public List<BuffEffect> buffList = new List<BuffEffect>();
 
-	void Start ()
-    {
-	}
-	
 	// Update is called once per frame
 	void Update ()
     {

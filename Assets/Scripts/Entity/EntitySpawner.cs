@@ -37,7 +37,22 @@ public class EntitySpawner : MonoBehaviour
 	void Start ()
     {
         Init();
+
+        GameManager gameMgr = FindObjectOfType<GameManager>();
+        if (gameMgr)
+        {
+            gameMgr.OnPauseEvent += SetPause;
+        }
 	}
+
+    void OnDestroy()
+    {
+        GameManager gameMgr = FindObjectOfType<GameManager>();
+        if (gameMgr)
+        {
+            gameMgr.OnPauseEvent -= SetPause;
+        }
+    }
 
 	void FixedUpdate ()
     {
@@ -100,7 +115,9 @@ public class EntitySpawner : MonoBehaviour
             return;
 
         GameObject spawnedObj = Instantiate(prefab, spawnPos, transform.rotation);
-
+        if (spawnedObj == null)
+            return;
+        
         if (isBuffEntity)
         {
             curSpawnedBuff.Add(spawnedObj);
@@ -120,8 +137,8 @@ public class EntitySpawner : MonoBehaviour
         spawnedObj.transform.parent = mapHolder;
     }
 
-    public void SetPause(bool flag)
-    {
+    void SetPause(bool flag)
+    {/*
         for (int i = 0; i < curSpawnedEntities.Count; i++)
         {
             GameObject obj = curSpawnedEntities[i];
@@ -146,7 +163,7 @@ public class EntitySpawner : MonoBehaviour
                     entity.SetPause(flag);
                 }
             }
-        }
+        }*/
 
         pause = flag;
     }

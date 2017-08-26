@@ -113,10 +113,10 @@ public class GameEndState : IGameState
 
     public void OnEnter()
     {
-        EntitySpawner entitySpawner = MonoBehaviour.FindObjectOfType<EntitySpawner>();
-        if (entitySpawner)
+        GameManager gameMgr = MonoBehaviour.FindObjectOfType<GameManager>();
+        if (gameMgr)
         {
-            entitySpawner.SetPause(true);
+            gameMgr.SetPause(true);
         }
 
         UIManager uiMgr = MonoBehaviour.FindObjectOfType<UIManager>();
@@ -169,8 +169,8 @@ public class StageCompleteState : IGameState
         GameManager gameMgr = MonoBehaviour.FindObjectOfType<GameManager>();
         if (gameMgr == null)
             return;
-        
-        entitySpawner.SetPause(true);
+
+        gameMgr.SetPause(true);
 
         int curIndex = mapMgr.GetCurMapIndex();
         if (curIndex >= mapMgr.GetTotalMapCount())
@@ -288,6 +288,8 @@ public class InGameState : IGameState
         player.StartGame(mapMgr.GetMotionPath());
 
         entitySpawner.StartSpawn(mapMgr.GetObstacleMaxCount(), 1.5f);
+
+        gameMgr.SetPause(false);
 
         HudView hudView = uiMgr.GetView(eUI_TYPE.HUD) as HudView;
         if (hudView)

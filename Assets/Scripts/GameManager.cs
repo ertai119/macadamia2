@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public delegate void OnGameEvent(bool flag);
+    public event OnGameEvent OnPauseEvent = delegate{};
+
     bool pause = false;
     int curStage = 0;
     int maxStage = 0;
@@ -103,10 +106,11 @@ public class GameManager : MonoBehaviour
         Player spawnedPlayerObj = FindObjectOfType<Player>();
         if (spawnedPlayerObj)
         {
+            
             DestroyImmediate(spawnedPlayerObj.gameObject);
         }
 
-        GameObject playerPrefab = Resources.Load("Player") as GameObject;
+        GameObject playerPrefab = Resources.Load("Ufo") as GameObject;
         GameObject playerObj = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         playerObj.name = playerPrefab.name;
         playerObj.transform.parent = gameObject.transform;
@@ -132,19 +136,13 @@ public class GameManager : MonoBehaviour
     {
         pause = flag;
 
-        entitySpawner.SetPause(flag);
-
-        Player player = FindObjectOfType<Player>();
-        if (player)
-        {
-            player.SetPause(flag);
-        }
-
         UIView uiView = uiMgr.GetView(eUI_TYPE.HUD);
         if (uiView)
         {
             uiView.GetComponent<HudView>().SetPause(flag);
         }
+
+        OnPauseEvent(flag);
     }
 
     public AdMobManager GetAdMobManager()

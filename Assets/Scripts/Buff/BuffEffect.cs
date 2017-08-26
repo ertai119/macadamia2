@@ -11,7 +11,7 @@ public class BuffEffect
 
     public GameObject target { get; set; }
 
-    public void OnEnter()
+    virtual public void OnEnter()
     {
         if (target == null)
             return;
@@ -20,15 +20,20 @@ public class BuffEffect
         if (propMgr == null)
             return;
 
-        propMgr.AddValue(propType, value);
+        float curValue = propMgr.AddValue(propType, value);
+
+        if (propType == ePropertyType.SCALE && curValue != 0f)
+        {
+            target.transform.localScale = CommonUtil.BaseScale() * curValue;
+        }
     }
 
-    public void OnUpdate()
+    virtual public void OnUpdate()
     {
         duration -= Time.deltaTime;
     }
 
-    public void OnExit()
+    virtual public void OnExit()
     {
         if (target == null)
             return;
@@ -37,7 +42,12 @@ public class BuffEffect
         if (propMgr == null)
             return;
 
-        propMgr.AddValue(propType, -value);
+        float curValue = propMgr.AddValue(propType, -value);
+
+        if (propType == ePropertyType.SCALE && curValue != 0f)
+        {
+            target.transform.localScale = CommonUtil.BaseScale() * curValue;
+        }
     }
 
     public bool IsEnd() { return duration < 0f; }

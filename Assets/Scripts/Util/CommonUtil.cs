@@ -4,6 +4,11 @@ using UnityEngine;
 
 static public class CommonUtil
 {
+    static public Vector3 BaseScale()
+    {
+        return new Vector3(1f, 1f, 1f);
+    }
+
     static public Vector3 GetDirToTarget(Vector3 from, Vector3 to)
     {
         return to - from;

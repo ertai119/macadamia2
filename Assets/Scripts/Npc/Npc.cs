@@ -30,10 +30,29 @@ public class Npc : Entity
 
             destoryFx.Play();
         }
+
+        GameManager gameMgr = FindObjectOfType<GameManager>();
+        if (gameMgr)
+        {
+            gameMgr.OnPauseEvent -= SetPause;
+        }
     }
 
     void Start ()
     {
+        float scale = propMgr.GetValue(ePropertyType.SCALE);
+        if (scale != 0f)
+        {
+            Vector3 curScale = transform.localScale;
+            gameObject.transform.localScale = curScale * scale;
+        }
+
+        GameManager gameMgr = FindObjectOfType<GameManager>();
+        if (gameMgr)
+        {
+            gameMgr.OnPauseEvent += SetPause;
+        }
+
         ChangeState(eNPC_STATE.SPAWN);
     }
 
@@ -82,6 +101,15 @@ public class Npc : Entity
         if (curState.GetState() == eNPC_STATE.SPAWN)
             return;
 
+        if (CommonUtil.IsPlayer(col.gameObject))
+        {
+            Player player = col.gameObject.GetComponent<Player>();
+            if (player)
+            {
+                player.GameEnd();
+            }
+        }
+            
         if (CommonUtil.IsWall(col.gameObject))
         {
             NpcController npcController = GetComponent<NpcController>();
