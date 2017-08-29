@@ -20,19 +20,7 @@ public class EntitySpawner : MonoBehaviour
     // Create map holder object
     string holderName = "Spawned Entities";
     Transform mapHolder;
-
-    public void Init()
-    {
-        if (transform.Find (holderName))
-        {
-            DestroyImmediate (transform.Find (holderName).gameObject);
-        }
-
-        mapHolder = new GameObject (holderName).transform;
-        mapHolder.parent = transform;
-
-        contentsLibrary.InitLibrary();
-    }
+    SpawnerStateManager spanwerStateMgr = new SpawnerStateManager();
 
 	void Start ()
     {
@@ -54,7 +42,20 @@ public class EntitySpawner : MonoBehaviour
         }
     }
 
-	void FixedUpdate ()
+    public void Init()
+    {
+        if (transform.Find (holderName))
+        {
+            DestroyImmediate (transform.Find (holderName).gameObject);
+        }
+
+        mapHolder = new GameObject (holderName).transform;
+        mapHolder.parent = transform;
+
+        contentsLibrary.InitLibrary();
+    }
+
+	void FixedUpdate()
     {
         if (pause == true)
             return;
@@ -66,6 +67,8 @@ public class EntitySpawner : MonoBehaviour
         
         nextSpawnTime += spawnDelay;
         SpawnEntity();
+
+        spanwerStateMgr.OnUpdate();
 	}
 
     public void StartSpawn(int maxCount, float delay)
@@ -138,33 +141,7 @@ public class EntitySpawner : MonoBehaviour
     }
 
     void SetPause(bool flag)
-    {/*
-        for (int i = 0; i < curSpawnedEntities.Count; i++)
-        {
-            GameObject obj = curSpawnedEntities[i];
-            if (obj != null)
-            {
-                Entity entity = obj.GetComponent<Entity>();
-                if (entity != null)
-                {
-                    entity.SetPause(flag);
-                }
-            }
-        }
-
-        for (int i = 0; i < curSpawnedBuff.Count; i++)
-        {
-            GameObject obj = curSpawnedBuff[i];
-            if (obj != null)
-            {
-                Entity entity = obj.GetComponent<Entity>();
-                if (entity != null)
-                {
-                    entity.SetPause(flag);
-                }
-            }
-        }*/
-
+    {
         pause = flag;
     }
 
