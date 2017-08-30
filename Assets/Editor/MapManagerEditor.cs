@@ -32,16 +32,6 @@ public class MapEditor : Editor
         {
             mapMgr.SaveToJson();
         }
-
-        if (GUILayout.Button("etc. Add Map"))
-        {
-            mapMgr.AddMap();
-        }
-
-        if (GUILayout.Button("etc. Delete Map"))
-        {
-            mapMgr.DeleteMap();
-        }
     }
 
 

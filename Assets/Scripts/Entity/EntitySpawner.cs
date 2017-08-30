@@ -83,15 +83,14 @@ public class EntitySpawner : MonoBehaviour
         if (pause == true)
             return;
         
-        if (spawnState != null)
-        {
-            spawnState.OnUpdate(Time.fixedDeltaTime);
-        }
-
         if (nextState != eSpawnerState.INVALID)
         {
             ChangeState(nextState);
             nextState = eSpawnerState.INVALID;
+        }
+        else if (spawnState != null)
+        {
+            spawnState.OnUpdate(Time.fixedDeltaTime);
         }
     }
 
@@ -156,6 +155,7 @@ public class EntitySpawner : MonoBehaviour
             List<GameObject> objList = pair.Value;
             for(int i = 0; i < objList.Count; i++)
             {
+                Debug.Log("clear npc " + objList[i]);
                 Destroy(objList[i], 0);
             }
         }

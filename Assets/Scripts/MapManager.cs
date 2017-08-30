@@ -7,16 +7,11 @@ using System.IO;
 public class StageJsonData
 {
     public int obstacleCount;
+    public bool spawnBoss;
     public string pathPrefabName;
     public string floorPrefabName;
     public string wallPrefabName;
     public List<Vector3> pathList = new List<Vector3>();
-}
-
-[System.Serializable]
-public class MapJsonData
-{
-    public List<StageJsonData> stageList = new List<StageJsonData>();
 }
 
 public class MapManager : MonoBehaviour
@@ -25,16 +20,17 @@ public class MapManager : MonoBehaviour
     public class Map
     {
         public int obstacleCount;
+        public bool spawnBoss;
         public GameObject floorPrefab;
         public GameObject wallPrefab;
         public GameObject pathPrefab;
         public GameObject pathObj;
     }
 
-    public MapJsonData maps;
+    public MapJsonDataDictionary maps;
     public int mapIndex = 0;
     public bool loaded = false;
-    public Map curMap;
+    public Map loadedMap;
 
     // Create map holder object
     string holderName = "Generated Map";
@@ -52,42 +48,50 @@ public class MapManager : MonoBehaviour
 
     public int GetTotalMapCount()
     {
-        return maps.stageList.Count;
+        return maps.Count;
     }
 
     public Vector3 GetCurMapSize()
     {
-        if (curMap == null)
+        if (loadedMap == null)
             return Vector3.zero;
 
-        if (curMap.floorPrefab == null)
+        if (loadedMap.floorPrefab == null)
             return Vector3.zero;
         
-        return curMap.floorPrefab.GetComponent<Renderer>().bounds.size;
+        return loadedMap.floorPrefab.GetComponent<Renderer>().bounds.size;
     }
 
     public int GetObstacleMaxCount()
     {
-        if (curMap == null)
+        if (loadedMap == null)
             return 0;
 
-        return curMap.obstacleCount;
+        return loadedMap.obstacleCount;
+    }
+
+    public bool EnableSpawnBoss()
+    {
+        if (loadedMap == null)
+            return false;
+
+        return loadedMap.spawnBoss;
     }
 
     public MotionPath GetMotionPath()
     {
-        if (curMap == null)
+        if (loadedMap == null)
             return null;
 
-        if (curMap.pathObj == null)
+        if (loadedMap.pathObj == null)
             return null;
 
-        return curMap.pathObj.GetComponent<MotionPath>();
+        return loadedMap.pathObj.GetComponent<MotionPath>();
     }
 
     void ReleaseStage()
     {
-        curMap = null;
+        loadedMap = null;
         if (transform.Find (holderName))
         {
             DestroyImmediate (transform.Find (holderName).gameObject);
@@ -137,25 +141,27 @@ public class MapManager : MonoBehaviour
 
         ReleaseStage();
 
-        int convertedIndex = mapIndex - 1;
-
-        if (convertedIndex < 0 || convertedIndex > maps.stageList.Count)
+        if (maps.ContainsKey(mapIndex) == false)
+        {
+            Debug.LogError("invalid index");
             return;
+        }
 
-        StageJsonData stageData = maps.stageList[convertedIndex];
-        curMap = new Map();
+        StageJsonData stageData = maps[mapIndex];
+        loadedMap = new Map();
 
-        curMap.pathPrefab = Resources.Load(stageData.pathPrefabName) as GameObject;
-        curMap.floorPrefab = Resources.Load(stageData.floorPrefabName) as GameObject;
-        curMap.wallPrefab = Resources.Load(stageData.wallPrefabName) as GameObject;
-        curMap.obstacleCount = stageData.obstacleCount;
+        loadedMap.pathPrefab = Resources.Load(stageData.pathPrefabName) as GameObject;
+        loadedMap.floorPrefab = Resources.Load(stageData.floorPrefabName) as GameObject;
+        loadedMap.wallPrefab = Resources.Load(stageData.wallPrefabName) as GameObject;
+        loadedMap.obstacleCount = stageData.obstacleCount;
+        loadedMap.spawnBoss = stageData.spawnBoss;
 
-        GameObject floorObj = Instantiate(curMap.floorPrefab, Vector3.zero, Quaternion.identity);
+        GameObject floorObj = Instantiate(loadedMap.floorPrefab, Vector3.zero, Quaternion.identity);
         floorObj.transform.parent = mapHolder;
 
-        GameObject pathObj = Instantiate(curMap.pathPrefab, Vector3.zero, Quaternion.identity);
+        GameObject pathObj = Instantiate(loadedMap.pathPrefab, Vector3.zero, Quaternion.identity);
         pathObj.transform.parent = mapHolder;
-        curMap.pathObj = pathObj;
+        loadedMap.pathObj = pathObj;
 
         MotionPath path = pathObj.GetComponent<MotionPath>();
         path.controlPoints = new Vector3[stageData.pathList.Count];
@@ -164,56 +170,33 @@ public class MapManager : MonoBehaviour
 
         pathObj.GetComponent<PathController>().VisiblePath();
 
-        CreateOutterWall(curMap.wallPrefab, curMap.floorPrefab, mapHolder);
+        CreateOutterWall(loadedMap.wallPrefab, loadedMap.floorPrefab, mapHolder);
     }
 
     public void SaveMap()
     {
-        int convertedIndex = mapIndex - 1;
-
-        if (convertedIndex < 0 || convertedIndex > maps.stageList.Count)
+        if (maps.ContainsKey(mapIndex) == false)
         {
             Debug.LogError("invalid index");
             return;
         }
 
-        StageJsonData jsonData = maps.stageList[convertedIndex];
+        StageJsonData jsonData = maps[mapIndex];
 
-        jsonData.obstacleCount = curMap.obstacleCount;
-        jsonData.floorPrefabName = curMap.floorPrefab.name;
-        jsonData.wallPrefabName = curMap.wallPrefab.name;
-        jsonData.pathPrefabName = curMap.pathPrefab.name;
+        jsonData.obstacleCount = loadedMap.obstacleCount;
+        jsonData.floorPrefabName = loadedMap.floorPrefab.name;
+        jsonData.wallPrefabName = loadedMap.wallPrefab.name;
+        jsonData.pathPrefabName = loadedMap.pathPrefab.name;
+        jsonData.spawnBoss = loadedMap.spawnBoss;
 
         jsonData.pathList.Clear();
 
-        PathController pathObj = curMap.pathObj.GetComponent<PathController>();
+        PathController pathObj = loadedMap.pathObj.GetComponent<PathController>();
         MotionPath path = pathObj.GetComponent<MotionPath>();
         for (int i = 0; i < path.controlPoints.Length; i++)
         {
             jsonData.pathList.Add(path.controlPoints[i]);
         }
-    }
-
-    public void DeleteMap()
-    {
-        int convertedIndex = mapIndex - 1;
-
-        if (convertedIndex < 0 || convertedIndex > maps.stageList.Count)
-        {
-            Debug.LogError("invalid index");
-            return;
-        }
-
-        maps.stageList.RemoveAt(convertedIndex);
-    }
-
-    public void AddMap()
-    {
-        if (loaded == false)
-            return;
-        
-        StageJsonData data = new StageJsonData();
-        maps.stageList.Add(data);
     }
 
     public void LoadFromJson()
@@ -229,6 +212,10 @@ public class MapManager : MonoBehaviour
     public void SaveToJson()
     {
         WriteData(maps);
+
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh ();
+#endif
     }
 
     string GetResourcePath()
@@ -236,19 +223,18 @@ public class MapManager : MonoBehaviour
         return CommonUtil.pathForDocumentsFile("Assets/Resources/LevelData/level.json");
     }
 
-    public void WriteData(MapJsonData data)
+    public void WriteData(MapJsonDataDictionary data)
     {
         string fileName = "level.json";
         string jsonStr = JsonUtility.ToJson(data, true);
 
-        Debug.Log(string.Format("========== write : ( {0} ) ==========", fileName));
-        Debug.Log(jsonStr);
 
         string filePath = GetResourcePath();
         System.IO.File.WriteAllText(filePath, jsonStr, System.Text.Encoding.Unicode);
+        Debug.Log(string.Format("========== write : ( {0} ) ==========", fileName));
     }
 
-    public MapJsonData LoadMapFromJson()
+    public MapJsonDataDictionary LoadMapFromJson()
     {
         string levelName = "leveldata/level";
         TextAsset txtAsset = Resources.Load(levelName) as TextAsset; 
@@ -256,8 +242,7 @@ public class MapManager : MonoBehaviour
         string json = stringReader.ReadToEnd();
 
         Debug.Log(string.Format(" =============== load : ({0}) ============= ", levelName));
-        Debug.Log(json);
-        var data = JsonUtility.FromJson<MapJsonData> (json);
+        var data = JsonUtility.FromJson<MapJsonDataDictionary> (json);
         return data;
     }
 

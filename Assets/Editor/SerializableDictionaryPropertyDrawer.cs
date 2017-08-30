@@ -8,6 +8,8 @@ using System;
 [CustomPropertyDrawer(typeof(StringStringDictionary))]
 [CustomPropertyDrawer(typeof(ObjectColorDictionary))]
 [CustomPropertyDrawer(typeof(PropertyDictionary))]
+[CustomPropertyDrawer(typeof(MapJsonDataDictionary))]
+
 public class AnySerializableDictionaryPropertyDrawer : SerializableDictionaryPropertyDrawer {}
 
 public class SerializableDictionaryPropertyDrawer : PropertyDrawer

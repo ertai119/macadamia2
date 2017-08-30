@@ -8,11 +8,6 @@ public class ContentsLibrary : MonoBehaviour
 
     Dictionary<string, GameObject[]> groupDictionary = new Dictionary<string, GameObject[]>();
 
-    void Awake()
-    {
-        InitLibrary();
-    }
-
     public void InitLibrary()
     {
         groupDictionary.Clear();

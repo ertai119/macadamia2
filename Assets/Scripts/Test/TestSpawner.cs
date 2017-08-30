@@ -13,7 +13,7 @@ public class TestSpawner : MonoBehaviour
 
 	void Start ()
     {
-        ContentsManager.Instance.InitLibrary();
+        ContentsManager.Instance.Init();
 
         GameObject npcSpawnerfab = Resources.Load("EntitySpawner") as GameObject;
         GameObject npcSpanwerObj = Instantiate(npcSpawnerfab, Vector3.zero, Quaternion.identity);

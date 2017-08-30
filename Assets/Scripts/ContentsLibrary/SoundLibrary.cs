@@ -8,11 +8,6 @@ public class SoundLibrary : MonoBehaviour
 
     Dictionary<string, AudioClip[]> groupDictionary = new Dictionary<string, AudioClip[]>();
 
-    void Awake()
-    {
-        InitLibrary();
-    }
-
     public void InitLibrary()
     {
         groupDictionary.Clear();

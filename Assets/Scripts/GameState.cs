@@ -287,7 +287,7 @@ public class InGameState : IGameState
 
         player.StartGame(mapMgr.GetMotionPath());
 
-        entitySpawner.StartSpawn(mapMgr.GetObstacleMaxCount(), 1.5f, true);
+        entitySpawner.StartSpawn(mapMgr.GetObstacleMaxCount(), 1.5f, mapMgr.EnableSpawnBoss());
 
         gameMgr.SetPause(false);
 

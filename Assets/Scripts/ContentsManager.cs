@@ -4,30 +4,42 @@ using UnityEngine;
 
 public class ContentsManager : MonoBehaviourSingleton<ContentsManager>
 {
-    ContentsLibrary library;
-	// Use this for initialization
-	void Start () {
-		
-	}
+    public ContentsLibrary gamelib;
+    public SoundLibrary soundLib;
 
-    public void InitLibrary()
+    public void Init()
     {
-        GameObject contentsLibObj = Resources.Load("ContentsLibrary") as GameObject;
-        library = contentsLibObj.GetComponent<ContentsLibrary>();
-        if (library)
-        {
-            library.InitLibrary();
-        }
+        LoadLibrary<ContentsLibrary>(ref gamelib, "ContentsLibrary");
+        LoadLibrary<SoundLibrary>(ref soundLib, "SoundLibrary");
+        gamelib.InitLibrary();
+        soundLib.InitLibrary();
+    }
+
+    void LoadLibrary<T>(ref T t, string libName)
+    {
+        GameObject obj = Resources.Load(libName) as GameObject;
+        t = obj.GetComponent<T>();
     }
 
     public GameObject GetPrefabFromName(string name)
     {
-        if (library == null)
+        if (gamelib == null)
         {
             Debug.LogError("cms library null");
             return null;
         }
 
-        return library.GetPrefabFromName(name);
+        return gamelib.GetPrefabFromName(name);
+    }
+
+    public AudioClip GetClipFromName(string name)
+    {
+        if (soundLib == null)
+        {
+            Debug.LogError("sound lib not loaded");
+            return null;
+        }
+
+        return soundLib.GetClipFromName(name);
     }
 }

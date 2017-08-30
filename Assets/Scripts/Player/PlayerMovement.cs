@@ -38,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
         if (loadPath == false)
             return;
 
+        AutoRotate();
+
         if (pause == true)
             return;
         
@@ -73,11 +75,15 @@ public class PlayerMovement : MonoBehaviour
     void SetPos(float posPercent)
     {
         Vector3 pos = motionPath.PointOnNormalizedPath(posPercent);
-        Vector3 norm = motionPath.NormalOnNormalizedPath(posPercent);
+        //Vector3 norm = motionPath.NormalOnNormalizedPath(posPercent);
 
         pos.y += 0.5f;
         transform.position = pos;
-        transform.forward = owner.GetSpeed() > 0 ? norm : -norm;
+        //transform.forward = owner.GetSpeed() > 0 ? norm : -norm;
     }
 
+    void AutoRotate()
+    {
+        transform.Rotate(new Vector3(0f, owner.GetSpeed(), 0f));
+    }
 }

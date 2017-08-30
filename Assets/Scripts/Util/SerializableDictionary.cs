@@ -13,6 +13,8 @@ public class ObjectColorDictionary : SerializableDictionary<UnityEngine.Object, 
 [Serializable]
 public class PropertyDictionary : SerializableDictionary<ePropertyType, float> {}
 
+[Serializable]
+public class MapJsonDataDictionary : SerializableDictionary<int, StageJsonData> {}
 
 public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
 {
@@ -56,7 +58,6 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
 			m_keys = null;
 			m_values = null;
 		}
-
 	}
 
 	public void OnBeforeSerialize()

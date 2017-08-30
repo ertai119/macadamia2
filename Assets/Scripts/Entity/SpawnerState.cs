@@ -44,7 +44,6 @@ public class IdleState : ISpawnState
 public class NormalState : ISpawnState
 {
     EntitySpawner owner;
-    int totalSpawnCount;
     float nextSpawnTime;
 
     public NormalState(EntitySpawner spawner)
@@ -54,6 +53,9 @@ public class NormalState : ISpawnState
 
     bool EnableSpawn()
     {
+        if (owner.pause == true)
+            return false;
+        
         int spawnedObjCount = owner.GetCurSpawnedObjCount(eSpawnType.NPC_NORMAL);
         if (owner.totalSpawnCount <= spawnedObjCount)
             return false;
@@ -87,7 +89,7 @@ public class NormalState : ISpawnState
             nextSpawnTime = Time.time + owner.spawnDelay;
         }
 
-        if (totalSpawnCount <= owner.GetCurSpawnedObjCount(eSpawnType.NPC_NORMAL)
+        if (owner.totalSpawnCount <= owner.GetCurSpawnedObjCount(eSpawnType.NPC_NORMAL)
             && owner.enableSpawnBoss == true)
         {
             owner.SetNextState(eSpawnerState.BOSS);
@@ -113,6 +115,9 @@ public class BossState : ISpawnState
 
     bool EnableSpawn()
     {
+        if (owner.pause == true)
+            return false;
+        
         int spawnedObjCount = owner.GetCurSpawnedObjCount(eSpawnType.NPC_BOSS);
         if (bossSpawnCount <= spawnedObjCount)
             return false;
@@ -132,6 +137,7 @@ public class BossState : ISpawnState
     public void OnEnter()
     {
         Debug.Log("OnEnter Boss State");
+        nextSpawnTime = Time.time + owner.spawnDelay;
     }
 
     public void OnUpdate(float deltaTime)

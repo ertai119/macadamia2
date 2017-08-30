@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
 
     void PrepareManager()
     {
+        ContentsManager.Instance.Init();
+
         GameObject mainCamPrefab = Resources.Load("MainCamera") as GameObject;
         GameObject mainCamObj = Instantiate(mainCamPrefab, mainCamPrefab.transform.position, mainCamPrefab.transform.rotation);
         mainCamObj.name = mainCamPrefab.name;
@@ -76,9 +78,6 @@ public class GameManager : MonoBehaviour
         admobMgrObj.transform.parent = gameObject.transform;
         adMobMgr = admobMgrObj.GetComponent<AdMobManager>();
         adMobMgr.Init();
-
-        AudioManager.Instance.InitLibrary();
-        ContentsManager.Instance.InitLibrary();
     }
 
     public int GetCurStageIndex()
