@@ -90,7 +90,18 @@ public class NpcSpawnState : NpcState
 
             spawnFx.gameObject.transform.SetParent(fxHolder);
 
-            ParticleExtensions.Scale(spawnFx, 0.5f);
+            bool isBoss = false;
+            PropertyManager propMgr = obstacle.GetComponent<PropertyManager>();
+            if (propMgr)
+            {
+                float value = propMgr.GetValue(ePropertyType.SCALE);
+                if (value >= 2f)
+                {
+                    isBoss = true;
+                }
+            }
+
+            ParticleExtensions.Scale(spawnFx, isBoss ? 0.75f : 0.5f);
 
             spawnFx.Play();
         }

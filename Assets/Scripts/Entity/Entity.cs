@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(PropertyManager))]
 public class Entity : MonoBehaviour
 {
     public bool debugMode = false;

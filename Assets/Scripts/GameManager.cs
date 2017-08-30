@@ -69,7 +69,6 @@ public class GameManager : MonoBehaviour
         npcSpanwerObj.name = npcSpawnerPrefab.name;
         npcSpanwerObj.transform.parent = gameObject.transform;
         entitySpawner = npcSpanwerObj.GetComponent<EntitySpawner>();
-        entitySpawner.Init();
 
         GameObject admobPrefab = Resources.Load("AdManager") as GameObject;
         GameObject admobMgrObj = Instantiate(admobPrefab, Vector3.zero, Quaternion.identity);
@@ -79,6 +78,7 @@ public class GameManager : MonoBehaviour
         adMobMgr.Init();
 
         AudioManager.Instance.InitLibrary();
+        ContentsManager.Instance.InitLibrary();
     }
 
     public int GetCurStageIndex()

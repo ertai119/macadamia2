@@ -2,36 +2,56 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum eSpawnType
+{
+    INVALID,
+    NPC_NORMAL,
+    NPC_BOSS,
+    BUFF,
+}
+
 public class EntitySpawner : MonoBehaviour
 {
-    List<GameObject> curSpawnedEntities = new List<GameObject>();
-    List<GameObject> curSpawnedBuff = new List<GameObject>();
+    Dictionary<eSpawnType, List<GameObject>> spawnedObjList = new Dictionary<eSpawnType, List<GameObject>>();
 
-    public ContentsLibrary contentsLibrary;
-    public int obstacleMaxCount = 0;
-    public float spawnDelay = 0f;
-    public bool startSpawn = false;
-    public float nextSpawnTime = 0f;
+    Dictionary<eSpawnerState, ISpawnState> states = new Dictionary<eSpawnerState, ISpawnState>();
+    ISpawnState spawnState = null;
+    public eSpawnerState nextState = eSpawnerState.IDLE;
+    public eSpawnerState curState = eSpawnerState.INVALID;
+
+    public int totalSpawnCount;
+    public float spawnDelay;
+    public bool enableSpawnBoss;
     public bool testMode = false;
-
-    float curTime = 0f;
-    bool pause = false;
+    public bool pause = false;
 
     // Create map holder object
     string holderName = "Spawned Entities";
     Transform mapHolder;
-    SpawnerStateManager spanwerStateMgr = new SpawnerStateManager();
+
+    void Awake()
+    {
+        states.Add(eSpawnerState.IDLE, new IdleState());
+        states.Add(eSpawnerState.NORMAL, new NormalState(this));
+        states.Add(eSpawnerState.BOSS, new BossState(this));
+    }
 
 	void Start ()
     {
-        Init();
+        if (transform.Find (holderName))
+        {
+            DestroyImmediate (transform.Find (holderName).gameObject);
+        }
+
+        mapHolder = new GameObject (holderName).transform;
+        mapHolder.parent = transform;
 
         GameManager gameMgr = FindObjectOfType<GameManager>();
         if (gameMgr)
         {
             gameMgr.OnPauseEvent += SetPause;
         }
-	}
+    }
 
     void OnDestroy()
     {
@@ -42,94 +62,78 @@ public class EntitySpawner : MonoBehaviour
         }
     }
 
-    public void Init()
+    void ChangeState(eSpawnerState state)
     {
-        if (transform.Find (holderName))
+        if (states.ContainsKey(state) == false)
+            return;
+
+        if (spawnState != null)
         {
-            DestroyImmediate (transform.Find (holderName).gameObject);
+            spawnState.OnExit();
         }
 
-        mapHolder = new GameObject (holderName).transform;
-        mapHolder.parent = transform;
+        spawnState = states[state];
+        spawnState.OnEnter();
 
-        contentsLibrary.InitLibrary();
+        curState = state;
     }
 
-	void FixedUpdate()
+    void FixedUpdate()
     {
         if (pause == true)
             return;
-
-        curTime += Time.fixedDeltaTime;
-
-        if (EnableSpawn() == false)
-            return;
         
-        nextSpawnTime += spawnDelay;
-        SpawnEntity();
+        if (spawnState != null)
+        {
+            spawnState.OnUpdate(Time.fixedDeltaTime);
+        }
 
-        spanwerStateMgr.OnUpdate();
-	}
+        if (nextState != eSpawnerState.INVALID)
+        {
+            ChangeState(nextState);
+            nextState = eSpawnerState.INVALID;
+        }
+    }
 
-    public void StartSpawn(int maxCount, float delay)
+    public void SetNextState(eSpawnerState state)
     {
-        obstacleMaxCount = maxCount;
-        spawnDelay = delay;
-        nextSpawnTime = curTime + spawnDelay;
+        nextState = state;
+    }
 
+    public int GetCurSpawnedObjCount(eSpawnType type)
+    {
+        if (spawnedObjList.ContainsKey(type) == false)
+        {
+            return 0;
+        }
+
+        return spawnedObjList[type].Count;
+    }
+
+    public void StartSpawn(int maxCount, float delay, bool lastSpawnBoss)
+    {
         pause = false;
-        startSpawn = true;
+        totalSpawnCount = maxCount;
+        spawnDelay = delay;
+        enableSpawnBoss = lastSpawnBoss;
+        SetNextState(eSpawnerState.NORMAL);
     }
 
-    bool EnableSpawn()
+    public void SpawnEntity(eSpawnType type, Vector3 spawnPos, string entityName)
     {
-        if (startSpawn == false)
-            return false;
-
-        if (curTime < nextSpawnTime)
-            return false;
-
-        if (curSpawnedEntities.Count >= obstacleMaxCount)
-            return false;
-        
-        return true;
-    }
-
-    void SpawnEntity()
-    {
-        Vector3 spawnPos = FindRandomSpawnPos();
-
-        string entityName = GameResourceName.contentBaseNpcName;
-
-        bool isBuffEntity = false;
-        float roullet = Random.Range(0f, 100f);
-        if (roullet > 80)
-        {
-            entityName = GameResourceName.contentsBuffName;
-            isBuffEntity = true;
-        }
-        else if (roullet > 20)
-        {
-            entityName = GameResourceName.contentsOptionalNpcName;
-        }
-
-        GameObject prefab = contentsLibrary.GetPrefabFromName(entityName);
+        GameObject prefab = ContentsManager.Instance.GetPrefabFromName(entityName);
         if (prefab == null)
             return;
 
         GameObject spawnedObj = Instantiate(prefab, spawnPos, transform.rotation);
         if (spawnedObj == null)
             return;
-        
-        if (isBuffEntity)
+
+        if (spawnedObjList.ContainsKey(type) == false)
         {
-            curSpawnedBuff.Add(spawnedObj);
+            spawnedObjList.Add(type, new List<GameObject>());
         }
-        else
-        {
-            spawnedObj.tag = "Npc";
-            curSpawnedEntities.Add(spawnedObj);
-        }
+        spawnedObjList[type].Add(spawnedObj);
 
         Entity entity = spawnedObj.GetComponent<Entity>();
         if (entity)
@@ -147,22 +151,19 @@ public class EntitySpawner : MonoBehaviour
 
     public void ClearAllObstacle()
     {
-        startSpawn = false;
-
-        for(int i = 0 ; i < curSpawnedEntities.Count; i++)
+        foreach(var pair in spawnedObjList)
         {
-            Destroy(curSpawnedEntities[i], 0);
+            List<GameObject> objList = pair.Value;
+            for(int i = 0; i < objList.Count; i++)
+            {
+                Destroy(objList[i], 0);
+            }
         }
-        curSpawnedEntities.Clear();
-
-        for (int i = 0; i < curSpawnedBuff.Count; i++)
-        {
-            Destroy(curSpawnedBuff[i], 0);
-        }
-        curSpawnedBuff.Clear();
+        spawnedObjList.Clear();
+        SetNextState(eSpawnerState.IDLE);
     }
 
-    Vector3 FindRandomSpawnPos()
+    public Vector3 FindRandomSpawnPos()
     {
         MapManager mapMgr = FindObjectOfType<MapManager>();
         if (mapMgr == null)

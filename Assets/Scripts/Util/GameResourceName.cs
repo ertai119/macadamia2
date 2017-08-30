@@ -6,6 +6,7 @@ static public class GameResourceName
     static public string contentsBuffName = "Buff";
     static public string contentsOptionalNpcName = "OptionalNpc";
     static public string contentBaseNpcName = "BaseNpc";
+    static public string contentBossNpcName = "BossNpc";
 }
 
 static public class GameUIString

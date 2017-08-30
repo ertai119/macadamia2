@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum eSpanwerState
+public enum eSpawnerState
 {
+    INVALID,
+    IDLE,
     NORMAL,
     BOSS
 }
@@ -11,16 +13,16 @@ public enum eSpanwerState
 interface ISpawnState
 {
     void OnEnter();
-    void OnUpdate();
+    void OnUpdate(float deltaTime);
     void OnExit();
-    eSpanwerState GetType();
+    eSpawnerState GetState();
 }
 
-public class NormalState : ISpawnState
+public class IdleState : ISpawnState
 {
-    public eSpanwerState GetType()
+    public eSpawnerState GetState()
     {
-        return eSpanwerState.NORMAL;
+        return eSpawnerState.IDLE;
     }
 
     public void OnEnter()
@@ -28,7 +30,7 @@ public class NormalState : ISpawnState
 
     }
 
-    public void OnUpdate()
+    public void OnUpdate(float deltaTime)
     {
 
     }
@@ -36,29 +38,117 @@ public class NormalState : ISpawnState
     public void OnExit()
     {
 
+    }
+}
+
+public class NormalState : ISpawnState
+{
+    EntitySpawner owner;
+    int totalSpawnCount;
+    float nextSpawnTime;
+
+    public NormalState(EntitySpawner spawner)
+    {
+        owner = spawner;
+    }
+
+    bool EnableSpawn()
+    {
+        int spawnedObjCount = owner.GetCurSpawnedObjCount(eSpawnType.NPC_NORMAL);
+        if (owner.totalSpawnCount <= spawnedObjCount)
+            return false;
+
+        float curTime = Time.time;
+        if (curTime <= nextSpawnTime)
+            return false;
+        
+        return true;
+    }
+
+    public eSpawnerState GetState()
+    {
+        return eSpawnerState.NORMAL;
+    }
+
+    public void OnEnter()
+    {
+        Debug.Log("OnEnter Normal State");
+        nextSpawnTime = Time.time;
+    }
+
+    public void OnUpdate(float deltaTime)
+    {
+        if (EnableSpawn())
+        {
+            owner.SpawnEntity(eSpawnType.NPC_NORMAL
+                , owner.FindRandomSpawnPos()
+                , GameResourceName.contentsOptionalNpcName);
+
+            nextSpawnTime = Time.time + owner.spawnDelay;
+        }
+
+        if (totalSpawnCount <= owner.GetCurSpawnedObjCount(eSpawnType.NPC_NORMAL)
+            && owner.enableSpawnBoss == true)
+        {
+            owner.SetNextState(eSpawnerState.BOSS);
+        }
+    }
+
+    public void OnExit()
+    {
+        Debug.Log("OnExit Normal State");
     }
 }
 
 public class BossState : ISpawnState
 {
-    public eSpanwerState GetType()
+    EntitySpawner owner;
+    int bossSpawnCount = 1;
+    float nextSpawnTime;
+
+    public BossState(EntitySpawner spawner)
     {
-        return eSpanwerState.BOSS;
+        owner = spawner;
+    }
+
+    bool EnableSpawn()
+    {
+        int spawnedObjCount = owner.GetCurSpawnedObjCount(eSpawnType.NPC_BOSS);
+        if (bossSpawnCount <= spawnedObjCount)
+            return false;
+
+        float curTime = Time.time;
+        if (curTime <= nextSpawnTime)
+            return false;
+
+        return true;
+    }
+
+    public eSpawnerState GetState()
+    {
+        return eSpawnerState.BOSS;
     }
 
     public void OnEnter()
     {
-
+        Debug.Log("OnEnter Boss State");
     }
 
-    public void OnUpdate()
+    public void OnUpdate(float deltaTime)
     {
+        if (EnableSpawn())
+        {
+            owner.SpawnEntity(eSpawnType.NPC_BOSS
+                , owner.FindRandomSpawnPos()
+                , GameResourceName.contentBossNpcName);
 
+            nextSpawnTime = Time.time + owner.spawnDelay;
+        }
     }
 
     public void OnExit()
     {
-
+        Debug.Log("OnExit Boss State");
     }
 }
 
