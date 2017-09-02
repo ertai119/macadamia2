@@ -51,12 +51,12 @@ public class NormalState : ISpawnState
         owner = spawner;
     }
 
-    bool EnableSpawn()
+    bool EnableSpawn(eSpawnType spawnType)
     {
         if (owner.pause == true)
             return false;
         
-        int spawnedObjCount = owner.GetCurSpawnedObjCount(eSpawnType.NPC_NORMAL);
+        int spawnedObjCount = owner.GetCurSpawnedObjCount(spawnType);
         if (owner.totalSpawnCount <= spawnedObjCount)
             return false;
 
@@ -80,9 +80,11 @@ public class NormalState : ISpawnState
 
     public void OnUpdate(float deltaTime)
     {
-        if (EnableSpawn())
+        eSpawnType spawnType = eSpawnType.NPC_NORMAL;
+
+        if (EnableSpawn(spawnType))
         {
-            owner.SpawnEntity(eSpawnType.NPC_NORMAL
+            owner.SpawnEntity(spawnType
                 , owner.FindRandomSpawnPos()
                 , GameResourceName.contentsOptionalNpcName);
 

@@ -6,18 +6,14 @@ using System.Collections;
 [CanEditMultipleObjects]
 public class MotionPathEditor : Editor 
 {
-	
 	private SerializedObject path;
 	private SerializedProperty controlPoints;
 	private SerializedProperty samples;
-	
 	
 	private static Vector3 textOffset = Vector3.down * 0.5f;
 	private static GUILayoutOption
 		buttonWidth = GUILayout.MaxWidth(30),
 		indexWidth = GUILayout.MaxWidth(20);
-	
-	
 	
 	void OnSceneGUI()
 	{
@@ -58,7 +54,6 @@ public class MotionPathEditor : Editor
 		}
 	}
 	
-	
 	void OnEnable()
 	{
 		((MotionPath)target).Init();
@@ -68,7 +63,6 @@ public class MotionPathEditor : Editor
 		samples = path.FindProperty("samples");
 	}
 	
-	
 	public override void OnInspectorGUI ()
 	{
 		path.Update();
@@ -76,10 +70,20 @@ public class MotionPathEditor : Editor
 		GUILayout.Space(10);
 		EditorGUILayout.BeginHorizontal();
 		EditorGUILayout.PropertyField(samples, new GUIContent("Samples Per Span", string.Format("\nTotal Samples = {0}", (pathObject.controlPoints.Length-1) * samples.intValue)));
-		
+
 		EditorGUILayout.EndHorizontal();
 		GUILayout.Space(20);
-		
+
+        if (GUILayout.Button("Update Path"))
+        {
+            MotionPath path = (MotionPath)target;
+            PathController pathCtl = path.GetComponent<PathController>();
+            if (pathCtl)
+            {
+                pathCtl.VisiblePath();
+            }
+        }
+
 		
 		GUILayout.Label("Path Points");
 		// First row add button to for begining of path

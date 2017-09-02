@@ -197,6 +197,8 @@ public class MapManager : MonoBehaviour
         {
             jsonData.pathList.Add(path.controlPoints[i]);
         }
+
+        pathObj.VisiblePath();
     }
 
     public void LoadFromJson()
@@ -225,8 +227,17 @@ public class MapManager : MonoBehaviour
 
     public void WriteData(MapJsonDataDictionary data)
     {
+        SortedDictionary<int, StageJsonData> sortedData = new SortedDictionary<int, StageJsonData>();
+        foreach(var pair in data)
+        {
+            sortedData.Add(pair.Key, pair.Value);
+        }
+
         string fileName = "level.json";
-        string jsonStr = JsonUtility.ToJson(data, true);
+        MapJsonDataDictionary writeData = new MapJsonDataDictionary();
+        writeData.CopyFrom(sortedData);
+
+        string jsonStr = JsonUtility.ToJson(writeData, true);
 
 
         string filePath = GetResourcePath();
