@@ -170,13 +170,6 @@ public class EntitySpawner : MonoBehaviour
             return transform.position;
 
         Vector3 mapSize = mapMgr.GetCurMapSize();
-        float offsetPos = 2f;
-        float convertedSizeX = mapSize.x - offsetPos;
-        float convertedSizeZ = mapSize.z - offsetPos;
-        float xPos = Random.Range(-convertedSizeX / 2, convertedSizeX / 2);
-        float zPos = Random.Range(-convertedSizeZ / 2, convertedSizeZ / 2);
-
-        return new Vector3(xPos, 0f, zPos);
+        return CommonUtil.GetMapRandomPos(mapSize);
     }
-
 }

@@ -172,12 +172,9 @@ public class StageCompleteState : IGameState
 
         gameMgr.SetPause(true);
 
+        // infinite loop last stage
         int curIndex = mapMgr.GetCurMapIndex();
-        if (curIndex >= mapMgr.GetTotalMapCount())
-        {
-            curIndex = 1;
-        }
-        else
+        if (curIndex < mapMgr.GetTotalMapCount())
         {
             curIndex++;
         }

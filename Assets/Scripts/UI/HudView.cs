@@ -8,6 +8,7 @@ public class HudView : UIView
     public Text stageInfoLabel;
     public Text playtimeLabel;
     public Text delayLabel;
+    public Text helpLabel;
 
     private float playTime;
     private bool startPlayTimer = false;
@@ -92,10 +93,12 @@ public class HudView : UIView
         if (seconds <= 0)
         {
             delayLabel.text = GameUIString.start;
+            helpLabel.text = "";
         }
         else
         {
             delayLabel.text = string.Format("{0:0}", seconds);
+            helpLabel.text = GameUIString.heplMsg;
         }
     }
 

@@ -9,6 +9,17 @@ static public class CommonUtil
         return new Vector3(1f, 1f, 1f);
     }
 
+    static public Vector3 GetMapRandomPos(Vector3 mapSize)
+    {
+        float offsetPos = 2f;
+        float convertedSizeX = mapSize.x - offsetPos;
+        float convertedSizeZ = mapSize.z - offsetPos;
+        float xPos = Random.Range(-convertedSizeX / 2, convertedSizeX / 2);
+        float zPos = Random.Range(-convertedSizeZ / 2, convertedSizeZ / 2);
+
+        return new Vector3(xPos, 0f, zPos);
+    }
+
     static public Vector3 GetDirToTarget(Vector3 from, Vector3 to)
     {
         return to - from;

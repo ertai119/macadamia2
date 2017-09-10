@@ -8,6 +8,7 @@ public class StageJsonData
 {
     public int obstacleCount;
     public bool spawnBoss;
+    public int randomPointCount;
     public string pathPrefabName;
     public string floorPrefabName;
     public string wallPrefabName;
@@ -21,6 +22,7 @@ public class MapManager : MonoBehaviour
     {
         public int obstacleCount;
         public bool spawnBoss;
+        public int randomPointCount;
         public GameObject floorPrefab;
         public GameObject wallPrefab;
         public GameObject pathPrefab;
@@ -134,6 +136,35 @@ public class MapManager : MonoBehaviour
         maskBottom.transform.localScale = new Vector3 (floorSize.x + (wallSize.x  * 2f), 1f, 1f);
     }
 
+    public void GenerateRandomPath()
+    {
+        if (loaded == false)
+            return;
+
+        if (loadedMap == null)
+            return;
+
+        int pathPointCount = loadedMap.randomPointCount;
+        if (pathPointCount == 0)
+            return;
+        
+        MotionPath motionPath = loadedMap.pathObj.GetComponent<MotionPath>();
+        if (motionPath)
+        {
+            motionPath.controlPoints = new Vector3[pathPointCount];
+
+            for (int i = 0; i < pathPointCount; i++)
+            {
+                Vector3 pathPos = CommonUtil.GetMapRandomPos(GetCurMapSize());
+
+                motionPath.controlPoints[i] = pathPos;
+            }
+            motionPath.Init();
+
+            loadedMap.pathObj.GetComponent<PathController>().VisiblePath();
+        }
+    }
+
     public void LoadMap()
     {
         if (loaded == false)
@@ -150,11 +181,12 @@ public class MapManager : MonoBehaviour
         StageJsonData stageData = maps[mapIndex];
         loadedMap = new Map();
 
-        loadedMap.pathPrefab = Resources.Load(stageData.pathPrefabName) as GameObject;
-        loadedMap.floorPrefab = Resources.Load(stageData.floorPrefabName) as GameObject;
-        loadedMap.wallPrefab = Resources.Load(stageData.wallPrefabName) as GameObject;
+        loadedMap.pathPrefab = Resources.Load(Path.Combine("Map", stageData.pathPrefabName)) as GameObject;
+        loadedMap.floorPrefab = Resources.Load(Path.Combine("Map" ,stageData.floorPrefabName)) as GameObject;
+        loadedMap.wallPrefab = Resources.Load(Path.Combine("Map", stageData.wallPrefabName)) as GameObject;
         loadedMap.obstacleCount = stageData.obstacleCount;
         loadedMap.spawnBoss = stageData.spawnBoss;
+        loadedMap.randomPointCount = stageData.randomPointCount;
 
         GameObject floorObj = Instantiate(loadedMap.floorPrefab, Vector3.zero, Quaternion.identity);
         floorObj.transform.parent = mapHolder;
@@ -163,12 +195,19 @@ public class MapManager : MonoBehaviour
         pathObj.transform.parent = mapHolder;
         loadedMap.pathObj = pathObj;
 
-        MotionPath path = pathObj.GetComponent<MotionPath>();
-        path.controlPoints = new Vector3[stageData.pathList.Count];
-        path.controlPoints = stageData.pathList.ToArray();
-        path.Init();
+        if (loadedMap.randomPointCount > 0)
+        {
+            GenerateRandomPath();
+        }
+        else
+        {
+            MotionPath path = pathObj.GetComponent<MotionPath>();
+            path.controlPoints = new Vector3[stageData.pathList.Count];
+            path.controlPoints = stageData.pathList.ToArray();
+            path.Init();
 
-        pathObj.GetComponent<PathController>().VisiblePath();
+            pathObj.GetComponent<PathController>().VisiblePath();
+        }
 
         CreateOutterWall(loadedMap.wallPrefab, loadedMap.floorPrefab, mapHolder);
     }
@@ -188,6 +227,7 @@ public class MapManager : MonoBehaviour
         jsonData.wallPrefabName = loadedMap.wallPrefab.name;
         jsonData.pathPrefabName = loadedMap.pathPrefab.name;
         jsonData.spawnBoss = loadedMap.spawnBoss;
+        jsonData.randomPointCount = loadedMap.randomPointCount;
 
         jsonData.pathList.Clear();
 

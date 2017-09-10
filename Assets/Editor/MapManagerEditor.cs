@@ -32,6 +32,11 @@ public class MapEditor : Editor
         {
             mapMgr.SaveToJson();
         }
+
+        if (GUILayout.Button("5. Generate Random Path"))
+        {
+            mapMgr.GenerateRandomPath();
+        }
     }
 
 

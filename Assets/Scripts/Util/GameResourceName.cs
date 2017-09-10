@@ -11,7 +11,7 @@ static public class GameResourceName
 
 static public class GameUIString
 {
-    static public string mainTitle = "BONG BONG";
+    static public string mainTitle = "SPACE BONG";
     static public string gameEnd = "GAME END";
     static public string continueGame = "CONTINUE";
     static public string start = "START";
@@ -19,4 +19,5 @@ static public class GameUIString
     static public string playTime = "Play Time";
     static public string stage = "STAGE";
     static public string best = "BEST";
+    static public string heplMsg = "Touch anywhere on the screen to move";
 }
