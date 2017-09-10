@@ -41,6 +41,8 @@ macadamia_pc.app
 ._*
 .Spotlight-V100
 .Trashes
+.vscode
 Icon?
 ehthumbs.db
 Thumbs.db
+readme.html
