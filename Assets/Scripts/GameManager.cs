@@ -133,6 +133,9 @@ public class GameManager : MonoBehaviour
 
     public void SetPause(bool flag)
     {
+        if (pause == flag)
+            return;
+
         pause = flag;
 
         UIView uiView = uiMgr.GetView(eUI_TYPE.HUD);
@@ -149,8 +152,33 @@ public class GameManager : MonoBehaviour
         return adMobMgr;
     }
 
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+
 	// Update is called once per frame
 	void Update ()
     {
-	}
+        if( Application.platform == RuntimePlatform.Android )
+        {
+            if (Input.GetKey(KeyCode.Home))
+            {
+                // home button
+                //ExitGame();
+            }
+            else if (Input.GetKey(KeyCode.Menu) || Input.GetKey(KeyCode.Escape))
+            {
+                // menu button || back button
+                if (GameStateManager.Instance.gameState == eGameState.INGAME)
+                {
+                    HudView view = uiMgr.GetView(eUI_TYPE.HUD) as HudView;
+                    if (view)
+                    {
+                        view.OnClickMenu();
+                    }
+                }
+            }
+        }
+    }
 }

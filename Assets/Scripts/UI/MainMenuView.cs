@@ -127,4 +127,13 @@ public class MainMenuView : UIView
         gameMgr.SetPause(false);
         uiMgr.SetVisible(eUI_TYPE.MAIN_MENU, false);
     }
+
+    public void OnClickExitGame()
+    {
+        GameManager gameMgr = FindObjectOfType<GameManager>();
+        if (gameMgr)
+        {
+            gameMgr.ExitGame();
+        }
+    }
 }
